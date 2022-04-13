@@ -48,6 +48,21 @@ const putUpdateBook = async (
     const id = req.params.id;
     const { title, pageCount, author } = req.body;
 
+    // * Validations
+    if (typeof title !== 'string' || title === '') {
+      throw new CustomErrors(401, 'Invalid Title');
+    }
+    if (
+      typeof author !== 'string' ||
+      author === '' ||
+      !/^[a-zA-Z]+$/.test(author)
+    ) {
+      throw new CustomErrors(401, 'Invalid Author');
+    }
+    if (typeof Number(pageCount) !== 'number' || Number(pageCount) <= 0) {
+      throw new CustomErrors(401, 'Invalid Page Count');
+    }
+
     const updatedBook = await Book.findByIdAndUpdate(
       id,
       {
@@ -60,12 +75,12 @@ const putUpdateBook = async (
       { new: true }
     );
 
-    if (updatedBook) {
-      res.json({ updatedBook, message: 'Book Details Updated' });
+    if (!updatedBook) {
+      throw new CustomErrors(404, 'Book not found');
     }
-  } catch (error) {
-    console.log(error);
 
+    res.json({ updatedBook, message: 'Book Details Updated' });
+  } catch (error) {
     next(error);
   }
 };
