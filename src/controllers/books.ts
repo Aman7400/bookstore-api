@@ -2,6 +2,7 @@ import { NextFunction, Request, RequestHandler, Response } from 'express';
 
 // import { CustomErrors } from '../middlewares/errors';
 import Book from '../models/books';
+import { CustomErrors } from '../middlewares/errors';
 
 // * Create a new Review
 const postNewBook = async (req: Request, res: Response, next: NextFunction) => {
@@ -72,16 +73,14 @@ const putUpdateBook = async (
 // * Delete a Book
 const deleteBook = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const id = req.params.id;
+    const _id = req.params.id;
 
-    const { acknowledged } = await Book.deleteOne({ _id: id });
-
-    if (acknowledged) {
-      res.json({ message: 'Book Deleted' });
+    const deleteBook = await Book.findByIdAndDelete(_id);
+    if (!deleteBook) {
+      throw new CustomErrors(404, 'Book not found');
     }
+    res.json({ message: 'Book Deleted' });
   } catch (error) {
-    console.log(error);
-
     next(error);
   }
 };
