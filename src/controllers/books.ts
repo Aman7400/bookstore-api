@@ -9,6 +9,9 @@ const postNewBook = async (req: Request, res: Response, next: NextFunction) => {
   const { title, author, pageCount } = req.body;
 
   try {
+    // * validations
+    validateBookDetails(title, author, pageCount);
+
     const newBook = new Book({
       title,
       author,
@@ -48,20 +51,8 @@ const putUpdateBook = async (
     const id = req.params.id;
     const { title, pageCount, author } = req.body;
 
-    // * Validations
-    if (typeof title !== 'string' || title === '') {
-      throw new CustomErrors(401, 'Invalid Title');
-    }
-    if (
-      typeof author !== 'string' ||
-      author === '' ||
-      !/^[a-zA-Z]+$/.test(author)
-    ) {
-      throw new CustomErrors(401, 'Invalid Author');
-    }
-    if (typeof Number(pageCount) !== 'number' || Number(pageCount) <= 0) {
-      throw new CustomErrors(401, 'Invalid Page Count');
-    }
+    // * validations
+    validateBookDetails(title, author, pageCount);
 
     const updatedBook = await Book.findByIdAndUpdate(
       id,
@@ -101,3 +92,20 @@ const deleteBook = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 export { postNewBook, getAllBooks, putUpdateBook, deleteBook };
+
+function validateBookDetails(title: string, author: string, pageCount: number) {
+  // * Validations
+  if (typeof title !== 'string' || title === '') {
+    throw new CustomErrors(401, 'Invalid Title');
+  }
+  if (
+    typeof author !== 'string' ||
+    author === '' ||
+    !/^[a-zA-Z]+$/.test(author)
+  ) {
+    throw new CustomErrors(401, 'Invalid Author');
+  }
+  if (typeof Number(pageCount) !== 'number' || Number(pageCount) <= 0) {
+    throw new CustomErrors(401, 'Invalid Page Count');
+  }
+}
